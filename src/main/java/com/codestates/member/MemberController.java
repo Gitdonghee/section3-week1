@@ -1,5 +1,6 @@
 package com.codestates.member;
 
+import com.codestates.response.v1.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import com.codestates.member.mapstruct.mapper.MemberMapper;
 
 
 @RestController
-@RequestMapping(value = "/v6/members")
+@RequestMapping(value = "/v7/members")
 @Validated
 @Slf4j
 public class MemberController {
@@ -90,7 +91,15 @@ public class MemberController {
     public ResponseEntity handleException(MethodArgumentNotValidException e){
         final List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
 
-        return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
+        List<ErrorResponse.FieldError> errors =
+                fieldErrors.stream()
+                        .map(error -> new ErrorResponse.FieldError(
+                                error.getField(),
+                                error.getRejectedValue(),
+                                error.getDefaultMessage()))
+                        .collect(Collectors.toList());
+
+        return new ResponseEntity<>(new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
 }
