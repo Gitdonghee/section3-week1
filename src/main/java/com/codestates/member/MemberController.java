@@ -1,8 +1,12 @@
 package com.codestates.member;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -13,11 +17,14 @@ import com.codestates.member.mapstruct.mapper.MemberMapper;
 
 
 @RestController
-@RequestMapping(value = "/v5/members")
+@RequestMapping(value = "/v6/members")
 @Validated
+@Slf4j
 public class MemberController {
     private final MemberService memberService;
     private final MemberMapper mapper;
+
+    @Autowired
     public MemberController(MemberService memberService, MemberMapper mapper){
         this.memberService = memberService;
         this.mapper = mapper;
@@ -77,6 +84,13 @@ public class MemberController {
         memberService.deleteMember(memberId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity handleException(MethodArgumentNotValidException e){
+        final List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+
+        return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
     }
 
 }
