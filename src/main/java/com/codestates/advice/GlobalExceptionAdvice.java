@@ -1,5 +1,6 @@
 package com.codestates.advice;
 
+import com.codestates.exception.BusinessLogicException;
 import com.codestates.response.v1.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,10 +35,10 @@ public class GlobalExceptionAdvice {
         return response;
     }
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleResourceNotFoundException(RuntimeException e){
+    public ResponseEntity handleBusinessLogicException(BusinessLogicException e){
+        System.out.println(e.getExceptionCode().getStatus());
         System.out.println(e.getMessage());
 
-        return null;
+        return new ResponseEntity<>(HttpStatus.valueOf(e.getExceptionCode().getStatus()));
     }
 }

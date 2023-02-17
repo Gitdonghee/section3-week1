@@ -1,5 +1,7 @@
 package com.codestates.member;
 
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.exception.ExceptionCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class MemberService {
     public Member findMember(long memberId){
 
         //Member member = new Member(memberId, "hgd@gmail.com", "홍길동", "010-1234-5678");
-        throw new RuntimeException("Not found member");
+        throw new BusinessLogicException(ExceptionCode.MEMBER_NOT_FOUND);
         //return member;
     }
 
