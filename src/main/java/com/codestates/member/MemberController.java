@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,7 +17,7 @@ import com.codestates.member.mapstruct.mapper.MemberMapper;
 
 
 @RestController
-@RequestMapping(value = "/v7/members")
+@RequestMapping(value = "/v8/members")
 @Validated
 @Slf4j
 public class MemberController {
@@ -87,19 +86,6 @@ public class MemberController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @ExceptionHandler
-    public ResponseEntity handleException(MethodArgumentNotValidException e){
-        final List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
 
-        List<ErrorResponse.FieldError> errors =
-                fieldErrors.stream()
-                        .map(error -> new ErrorResponse.FieldError(
-                                error.getField(),
-                                error.getRejectedValue(),
-                                error.getDefaultMessage()))
-                        .collect(Collectors.toList());
-
-        return new ResponseEntity<>(new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
-    }
 
 }

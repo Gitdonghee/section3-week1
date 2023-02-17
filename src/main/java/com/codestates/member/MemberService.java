@@ -20,8 +20,9 @@ public class MemberService {
 
     public Member findMember(long memberId){
 
-        Member member = new Member(memberId, "hgd@gmail.com", "홍길동", "010-1234-5678");
-        return member;
+        //Member member = new Member(memberId, "hgd@gmail.com", "홍길동", "010-1234-5678");
+        throw new RuntimeException("Not found member");
+        //return member;
     }
 
     public List<Member> findMembers(){
