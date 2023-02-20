@@ -18,8 +18,8 @@ import com.codestates.member.mapstruct.mapper.MemberMapper;
 
 @RestController
 @RequestMapping(value = "/v8/members")
-@Validated
 @Slf4j
+@Validated
 public class MemberController {
     private final MemberService memberService;
     private final MemberMapper mapper;
@@ -42,8 +42,9 @@ public class MemberController {
 
         return new ResponseEntity<>(mapper.memberToMemberResponseDto(response), HttpStatus.CREATED);
     }
+
     @PatchMapping("/{member-id}")
-    public ResponseEntity patchMember(@PathVariable("member-id") @Min(2) long memberId,
+    public ResponseEntity patchMember(@PathVariable("member-id")  @Min(2) long memberId,
                                       @Valid @RequestBody MemberPatchDto memberPatchDto){
         memberPatchDto.setMemberId(memberId);
 

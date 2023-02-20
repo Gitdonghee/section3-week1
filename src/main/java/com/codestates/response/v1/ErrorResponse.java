@@ -19,12 +19,15 @@ public class ErrorResponse {
         this.fieldErrors = fieldErrors;
         this.violationErrors = violationErrors;
     }
-    public static ErrorResponse of(BindingResult bindingResult){
-        return new ErrorResponse(FieldError.of(bindingResult),null);
-    }
+
     public static ErrorResponse of(Set<ConstraintViolation<?>> violations){
         return new ErrorResponse(null, ConstraintViolationError.of(violations));
     }
+
+    public static ErrorResponse of(BindingResult bindingResult){
+        return new ErrorResponse(FieldError.of(bindingResult),null);
+    }
+
     @Getter
     public static class FieldError{
         private String field;
