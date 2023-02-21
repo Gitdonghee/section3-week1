@@ -1,8 +1,8 @@
 package com.codestates.member.mapstruct.mapper;
 
-import com.codestates.member.MemberPatchDto;
-import com.codestates.member.MemberPostDto;
-import com.codestates.member.MemberResponseDto;
+import com.codestates.member.dto.MemberPatchDto;
+import com.codestates.member.dto.MemberPostDto;
+import com.codestates.member.dto.MemberResponseDto;
 import com.codestates.member.Member;
 import org.mapstruct.Mapper;
 

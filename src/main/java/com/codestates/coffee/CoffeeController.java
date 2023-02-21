@@ -1,60 +1,94 @@
 package com.codestates.coffee;
 
 
+import com.codestates.coffee.dto.CoffeePatchDto;
+import com.codestates.coffee.dto.CoffeePostDto;
+import com.codestates.coffee.dto.CoffeeResponseDto;
+import com.codestates.coffee.mapstruct.mapper.CoffeeMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+
 @RestController
-@RequestMapping(value = "/v1/coffees", produces = {MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = "/v10/coffees")
+@Slf4j
+@Validated
 public class CoffeeController {
-    @PostConstruct
-    public void init() {
-        Map<String, Object> coffee1 = new HashMap<>();
-        long coffeeId = 1L;
-        coffee1.put("coffeeId", coffeeId);
-        coffee1.put("korName", "바닐라 라떼");
-        coffee1.put("engName", "Vanilla Latte");
-        coffee1.put("price", 4500);
+    private final static String COFFEE_DEFAULT_URL = "/v10/coffees";
+    private CoffeeService coffeeService;
+    private CoffeeMapper mapper;
 
+    @Autowired
+    public CoffeeController(CoffeeService coffeeService, CoffeeMapper coffeeMapper){
+        this.coffeeService = coffeeService;
+        this.mapper = coffeeMapper;
     }
-    @PostMapping
-    public ResponseEntity postCoffee(@RequestBody CoffeePostDto coffeePostDto){
-        System.out.println(" # engName : " + coffeePostDto.getEngName());
-        System.out.println(" # korName : " + coffeePostDto.getKorName());
-        System.out.println(" # price : " + coffeePostDto.getPrice());
 
-        return new ResponseEntity<>(coffeePostDto, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity postCoffee(@Valid @RequestBody CoffeePostDto coffeePostDto){
+
+        Coffee coffee = coffeeService.createCoffee(mapper.coffeePostDtoToCoffee(coffeePostDto));
+        URI location =
+                UriComponentsBuilder
+                        .newInstance()
+                        .path(COFFEE_DEFAULT_URL + "/{coffee-id}")
+                        .buildAndExpand(coffee.getCoffeeId())
+                        .toUri();
+
+
+        System.out.println(" # EngName : " + coffeePostDto.getEngName());
+        System.out.println(" # KorName : " + coffeePostDto.getKorName());
+        System.out.println(" # Price : " + coffeePostDto.getPrice());
+
+        return ResponseEntity.created(location).build();
     }
 
     @PatchMapping("/{coffee-id}")
-    public ResponseEntity patchCoffee(@PathVariable("coffee-id")long coffeeId,
-                                      @RequestBody CoffeePatchDto coffeePatchDto){
+    public ResponseEntity patchCoffee(@PathVariable("coffee-id")@Positive long coffeeId,
+                                      @Valid @RequestBody CoffeePatchDto coffeePatchDto){
         coffeePatchDto.setCoffeeId(coffeeId);
-        coffeePatchDto.setPrice(6000);
+        Coffee response = coffeeService.updateCoffee(mapper.coffeePatchDtoToCoffee(coffeePatchDto));
 
-        return new ResponseEntity<>(coffeePatchDto, HttpStatus.OK);
+        return new ResponseEntity<>(mapper.coffeeToCoffeeResponseDto(response), HttpStatus.OK);
     }
     @GetMapping("/{coffee-id}")
-    public ResponseEntity getCoffee(@PathVariable("coffee-id")long coffeeId){
+    public ResponseEntity getCoffee(@PathVariable("coffee-id")  @Positive long coffeeId){
+        Coffee response = coffeeService.findCoffee(coffeeId);
         System.out.println("# coffeeID : " + coffeeId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(mapper.coffeeToCoffeeResponseDto(response),HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity getCoffees(HttpEntity httpEntity){
-        for (Map.Entry<String, List<String>> entry : httpEntity.getHeaders().entrySet()){
-            System.out.println("key : " + entry.getKey() + ", value : " + entry.getValue());
-        }
+    public ResponseEntity getCoffees(){
         System.out.println("# get Coffees");
+        List<Coffee>coffees = coffeeService.findCoffees();
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<CoffeeResponseDto> response =
+                coffees.stream()
+                        .map(coffee -> mapper.coffeeToCoffeeResponseDto(coffee))
+                        .collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{coffee-id}")
+    public ResponseEntity deleteCoffee(@PathVariable("coffee-id") long coffeeid){
+
+        coffeeService.deleteCoffee(coffeeid);
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

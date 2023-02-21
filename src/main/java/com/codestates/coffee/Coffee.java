@@ -1,14 +1,16 @@
 package com.codestates.coffee;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
 
-@AllArgsConstructor
 @Getter
+@Setter
 public class Coffee {
-    String korName;
-
-    String engName;
-
-    String price;
+    @Id
+    private long coffeeId;
+    private String korName;
+    private String engName;
+    private int price;
+    private String coffeeCode;
 }
